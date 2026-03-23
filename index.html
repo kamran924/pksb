@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKSB - Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <h1>PKSB Braunschweig</h1>
+     <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <nav id="nav-menu">
+        <a href="index.html" class="active">Home</a>
+        <a href="about.html">About</a>
+        <a href="events.html">Events</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h2>Pakistanischer Kultur- und Sozialverein</h2>
+    <p>Connecting cultures. Building community in Braunschweig 🇵🇰🇩🇪</p>
+</section>
+
+<section class="container">
+    <h2>What We Do</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>🎉 Cultural Events</h3>
+            <p>Celebrate Pakistani traditions, Eid events, and national days.</p>
+        </div>
+
+        <div class="card">
+            <h3>🤝 Community Support</h3>
+            <p>Helping newcomers integrate and feel at home in Germany.</p>
+        </div>
+
+        <div class="card">
+            <h3>🌍 Integration</h3>
+            <p>Promoting intercultural dialogue and understanding.</p>
+        </div>
+
+    </div>
+</section>
+
+<section class="container">
+    <h2>Latest News</h2>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Pakistan Day Event</h3>
+            <p>Join us for celebrations on March 23 🇵🇰</p>
+        </div>
+
+        <div class="card">
+            <h3>Eid Gathering</h3>
+            <p>Community Eid meetup coming soon.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 PKSB Braunschweig</p>
+</footer>
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("nav-menu");
+    menu.classList.toggle("active");
+}
+</script>
+
+</body>
+</html>

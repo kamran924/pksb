@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About - PKSB</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <h1>About - PKSB</h1>
+     <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <nav id="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="about.html" class="active">About</a>
+        <a href="events.html">Events</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+</header>
+
+<section>
+    <h2>Who We Are</h2>
+    <p>
+        PKSB is a community organization representing people of Pakistani origin
+        in Braunschweig, Germany.
+    </p>
+
+    <h2>Our Goals</h2>
+    <ul>
+        <li>Promote Pakistani culture</li>
+        <li>Support integration</li>
+        <li>Encourage intercultural dialogue</li>
+    </ul>
+</section>
+
+<footer>
+    <p>© 2026 PKSB Braunschweig</p>
+</footer>
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("nav-menu");
+    menu.classList.toggle("active");
+}
+</script>
+
+</body>
+</html>

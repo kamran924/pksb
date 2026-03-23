@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Events - PKSB</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <h1>Our Events</h1>
+     <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <nav id="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="events.html" class="active">Events</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+</header>
+
+<section>
+    <h2>Upcoming Events</h2>
+    <ul>
+        <li>Pakistan Day Celebration – March 23</li>
+        <li>Eid Gathering</li>
+        <li>Community Meetup</li>
+    </ul>
+</section>
+
+<footer>
+    <p>© 2026 PKSB Braunschweig</p>
+</footer>
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("nav-menu");
+    menu.classList.toggle("active");
+}
+</script>
+</body>
+</html>

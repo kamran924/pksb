@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact - PKSB</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <h1>Contact Us</h1>
+     <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <nav id="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="events.html">Events</a>
+        <a href="contact.html" class="active">Contact</a>
+    </nav>
+</header>
+
+<section>
+    <h2>Get in Touch</h2>
+    <p>Email: info@pksb.de</p>
+    <p>Location: Braunschweig, Germany</p>
+</section>
+
+<footer>
+    <p>© 2026 PKSB Braunschweig</p>
+</footer>
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("nav-menu");
+    menu.classList.toggle("active");
+}
+</script>
+
+</body>
+</html>
