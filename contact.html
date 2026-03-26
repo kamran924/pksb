@@ -9,24 +9,38 @@
 <body>
 
 <header class="header">
-    <h1>Contact Us</h1>
-     <div class="menu-toggle" onclick="toggleMenu()">
-        ☰
+    <div class="header-content">
+        <h1>PKSB Braunschweig</h1>
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+        <nav id="nav-menu">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="events.html">Events</a>
+            <a href="contact.html" class="active">Contact</a>
+        </nav>
     </div>
-
-    <nav id="nav-menu">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="events.html">Events</a>
-        <a href="contact.html" class="active">Contact</a>
-    </nav>
 </header>
 
-<section>
+<div class="container">
     <h2>Get in Touch</h2>
-    <p>Email: info@pksb.de</p>
-    <p>Location: Braunschweig, Germany</p>
-</section>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Email Us</h3>
+            <p>info@pksb.de</p>
+        </div>
+
+        <div class="card">
+            <h3>Visit Us</h3>
+            <p>Braunschweig, Germany</p>
+        </div>
+
+        <div class="card">
+            <h3>Join Our Community</h3>
+            <p>We welcome everyone interested in Pakistani culture and community building. Reach out to learn more about our activities.</p>
+        </div>
+    </div>
+</div>
 
 <footer>
     <p>© 2026 PKSB Braunschweig</p>

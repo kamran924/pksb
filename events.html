@@ -9,27 +9,38 @@
 <body>
 
 <header class="header">
-    <h1>Our Events</h1>
-     <div class="menu-toggle" onclick="toggleMenu()">
-        ☰
+    <div class="header-content">
+        <h1>PKSB Braunschweig</h1>
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+        <nav id="nav-menu">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="events.html" class="active">Events</a>
+            <a href="contact.html">Contact</a>
+        </nav>
     </div>
-
-    <nav id="nav-menu">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="events.html" class="active">Events</a>
-        <a href="contact.html">Contact</a>
-    </nav>
 </header>
 
-<section>
-    <h2>Upcoming Events</h2>
-    <ul>
-        <li>Pakistan Day Celebration – March 23</li>
-        <li>Eid Gathering</li>
-        <li>Community Meetup</li>
-    </ul>
-</section>
+<div class="container">
+    <h2>Our Events</h2>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Pakistan Day Celebration</h3>
+            <p>March 23 - Join us in celebrating Pakistan's national day with cultural performances, traditional food, and community gathering.</p>
+        </div>
+
+        <div class="card">
+            <h3>Eid Gathering</h3>
+            <p>Celebrate Eid with the community. Traditional celebrations, prayers, and festive meals bring everyone together.</p>
+        </div>
+
+        <div class="card">
+            <h3>Community Meetup</h3>
+            <p>Regular monthly meetups to connect with fellow community members, share experiences, and build lasting friendships.</p>
+        </div>
+    </div>
+</div>
 
 <footer>
     <p>© 2026 PKSB Braunschweig</p>
