@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PKSB</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #F8FAF9;
+            color: #1A1A1A;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #01411C;
+            color: white;
+            padding: 32px 24px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 32px;
+            font-weight: 700;
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu li {
+            margin-bottom: 8px;
+        }
+
+        .menu button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .menu button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .menu button.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .logout-btn {
+            width: 100%;
+            margin-top: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .main {
+            margin-left: 250px;
+            flex: 1;
+            padding: 32px;
+        }
+
+        .header {
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #01411C;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-card {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 32px;
+        }
+
+        .form-card h3 {
+            margin-bottom: 24px;
+            color: #01411C;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1A1A1A;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="datetime-local"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #01411C;
+            box-shadow: 0 0 0 3px rgba(1, 65, 28, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button[type="submit"],
+        button[type="button"] {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        button[type="submit"] {
+            background: #01411C;
+            color: white;
+        }
+
+        button[type="submit"]:hover {
+            background: #0A6E3A;
+        }
+
+        button[type="button"] {
+            background: #E2E8F0;
+            color: #4A5568;
+        }
+
+        button[type="button"]:hover {
+            background: #CBD5E0;
+        }
+
+        .items-list {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .item {
+            padding: 20px;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-content h4 {
+            margin-bottom: 4px;
+            color: #1A1A1A;
+            font-size: 16px;
+        }
+
+        .item-content p {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-edit {
+            background: #0A6E3A;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #01411C;
+        }
+
+        .btn-delete {
+            background: #FEE;
+            color: #C33;
+            border: 1px solid #FCC;
+        }
+
+        .btn-delete:hover {
+            background: #FCC;
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #FEE;
+            color: #C33;
+            border: 1px solid #FCC;
+        }
+
+        .success {
+            background: #EFE;
+            color: #3C3;
+            border: 1px solid #CFC;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 16px;
+            background: #F8FAF9;
+            border: 2px dashed #E2E8F0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .file-input-label:hover {
+            border-color: #01411C;
+            background: rgba(1, 65, 28, 0.05);
+        }
+
+        .image-preview {
+            margin-top: 12px;
+            max-width: 200px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 3px solid #E2E8F0;
+            border-top: 3px solid #01411C;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #718096;
+        }
+
+        .empty-state p {
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                padding: 16px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .menu li {
+                flex: 1;
+                min-width: 150px;
+            }
+
+            .item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .item-actions {
+                margin-top: 12px;
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button[type="submit"],
+            button[type="button"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>Admin</h2>
+        <ul class="menu">
+            <li><button data-section="events" class="active">Events</button></li>
+            <li><button data-section="news">News</button></li>
+            <li><button data-section="team">Team</button></li>
+            <li><button data-section="about">About</button></li>
+        </ul>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1>Content Management</h1>
+            <p>Manage your website content from here</p>
+        </div>
+
+        <!-- EVENTS SECTION -->
+        <div id="events" class="section active">
+            <div class="form-card">
+                <h3>Add New Event</h3>
+                <div id="eventError" class="message error"></div>
+                <div id="eventSuccess" class="message success"></div>
+
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label>Event Title</label>
+                        <input type="text" id="eventTitle" placeholder="e.g., Eid Celebration" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date & Time</label>
+                        <input type="datetime-local" id="eventDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="eventLocation" placeholder="e.g., Community Center" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="eventDescription" placeholder="Event details..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Image</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="eventImage" accept="image/*">
+                            <label for="eventImage" class="file-input-label">Choose image or drag here</label>
+                            <img id="eventImagePreview" class="image-preview" alt="Preview">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit">Create Event</button>
+                        <button type="button" id="resetEventForm">Clear</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="eventsList" class="items-list"></div>
+        </div>
+
+        <!-- NEWS SECTION -->
+        <div id="news" class="section">
+            <div class="form-card">
+                <h3>Add News Update</h3>
+                <div id="newsError" class="message error"></div>
+                <div id="newsSuccess" class="message success"></div>
+
+                <form id="newsForm">
+                    <div class="form-group">
+                        <label>News Title</label>
+                        <input type="text" id="newsTitle" placeholder="e.g., Community Meetup Scheduled" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="newsDescription" placeholder="News details..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Image</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="newsImage" accept="image/*">
+                            <label for="newsImage" class="file-input-label">Choose image or drag here</label>
+                            <img id="newsImagePreview" class="image-preview" alt="Preview">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit">Post News</button>
+                        <button type="button" id="resetNewsForm">Clear</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="newsList" class="items-list"></div>
+        </div>
+
+        <!-- TEAM SECTION -->
+        <div id="team" class="section">
+            <div class="form-card">
+                <h3>Add Team Member</h3>
+                <div id="teamError" class="message error"></div>
+                <div id="teamSuccess" class="message success"></div>
+
+                <form id="teamForm">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="teamName" placeholder="Full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input type="text" id="teamRole" placeholder="e.g., Coordinator" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="teamDescription" placeholder="Bio or brief description"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Image</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="teamImage" accept="image/*">
+                            <label for="teamImage" class="file-input-label">Choose image or drag here</label>
+                            <img id="teamImagePreview" class="image-preview" alt="Preview">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit">Add Member</button>
+                        <button type="button" id="resetTeamForm">Clear</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="teamList" class="items-list"></div>
+        </div>
+
+        <!-- ABOUT SECTION -->
+        <div id="about" class="section">
+            <div class="form-card">
+                <h3>About Page Content</h3>
+                <div id="aboutError" class="message error"></div>
+                <div id="aboutSuccess" class="message success"></div>
+
+                <form id="aboutForm">
+                    <div class="form-group">
+                        <label>Section Name</label>
+                        <input type="text" id="aboutSectionName" placeholder="e.g., Mission" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Content</label>
+                        <textarea id="aboutContent" placeholder="Section content..." required></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit">Save Section</button>
+                        <button type="button" id="resetAboutForm">Clear</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="aboutList" class="items-list"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { supabase, getEvents, getNews, getTeam, getAboutSection, createEvent, updateEvent, deleteEvent, createNews, updateNews, deleteNews, createTeamMember, updateTeamMember, deleteTeamMember, updateAboutSection } from './supabase-client.js';
+
+    let currentSession = null;
+
+    // Check authentication
+    async function checkAuth() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = 'admin-login.html';
+        } else {
+            currentSession = session;
+        }
+    }
+
+    // Initialize
+    checkAuth();
+
+    // Navigation
+    document.querySelectorAll('.menu button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+            e.target.classList.add('active');
+            const section = e.target.dataset.section;
+            document.getElementById(section).classList.add('active');
+
+            if (section === 'events') loadEvents();
+            if (section === 'news') loadNews();
+            if (section === 'team') loadTeam();
+            if (section === 'about') loadAbout();
+        });
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        localStorage.removeItem('adminToken');
+        window.location.href = 'admin-login.html';
+    });
+
+    // File input handlers
+    function setupFileInput(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        const label = input.nextElementSibling;
+
+        input.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.src = event.target?.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        label.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            label.style.borderColor = '#01411C';
+            label.style.background = 'rgba(1, 65, 28, 0.1)';
+        });
+
+        label.addEventListener('dragleave', () => {
+            label.style.borderColor = '#E2E8F0';
+            label.style.background = '#F8FAF9';
+        });
+
+        label.addEventListener('drop', (e) => {
+            e.preventDefault();
+            label.style.borderColor = '#E2E8F0';
+            label.style.background = '#F8FAF9';
+            const files = e.dataTransfer?.files;
+            if (files?.[0]) {
+                input.files = files;
+                const event = new Event('change', { bubbles: true });
+                input.dispatchEvent(event);
+            }
+        });
+    }
+
+    setupFileInput('eventImage', 'eventImagePreview');
+    setupFileInput('newsImage', 'newsImagePreview');
+    setupFileInput('teamImage', 'teamImagePreview');
+
+    // Utility functions
+    function showMessage(elementId, message, isError = false) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = `message ${isError ? 'error' : 'success'}`;
+        element.style.display = 'block';
+        setTimeout(() => {
+            element.style.display = 'none';
+        }, 4000);
+    }
+
+    function getImagePath(file) {
+        if (!file) return null;
+        return `images/${Date.now()}_${file.name}`;
+    }
+
+    // EVENTS
+    async function loadEvents() {
+        const events = await getEvents();
+        const list = document.getElementById('eventsList');
+
+        if (events.length === 0) {
+            list.innerHTML = '<div class="empty-state"><p>No events yet. Create your first event!</p></div>';
+            return;
+        }
+
+        list.innerHTML = events.map(event => `
+            <div class="item">
+                <div class="item-content">
+                    <h4>${event.title}</h4>
+                    <p>${new Date(event.date).toLocaleString()} • ${event.location}</p>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-small btn-edit" onclick="editEvent('${event.id}')">Edit</button>
+                    <button class="btn-small btn-delete" onclick="deleteEventItem('${event.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.deleteEventItem = async (id) => {
+        if (confirm('Are you sure?')) {
+            await deleteEvent(id);
+            loadEvents();
+            showMessage('eventSuccess', 'Event deleted');
+        }
+    };
+
+    window.editEvent = (id) => {
+        alert('Edit feature coming soon');
+    };
+
+    document.getElementById('eventForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+
+        const eventData = {
+            title: document.getElementById('eventTitle').value,
+            date: new Date(document.getElementById('eventDate').value).toISOString(),
+            location: document.getElementById('eventLocation').value,
+            description: document.getElementById('eventDescription').value,
+            image_url: getImagePath(document.getElementById('eventImage').files?.[0])
+        };
+
+        await createEvent(eventData);
+        showMessage('eventSuccess', 'Event created successfully!');
+        form.reset();
+        document.getElementById('eventImagePreview').style.display = 'none';
+        loadEvents();
+    });
+
+    document.getElementById('resetEventForm').addEventListener('click', () => {
+        document.getElementById('eventForm').reset();
+        document.getElementById('eventImagePreview').style.display = 'none';
+    });
+
+    // NEWS
+    async function loadNews() {
+        const news = await getNews();
+        const list = document.getElementById('newsList');
+
+        if (news.length === 0) {
+            list.innerHTML = '<div class="empty-state"><p>No news yet. Share your first update!</p></div>';
+            return;
+        }
+
+        list.innerHTML = news.map(item => `
+            <div class="item">
+                <div class="item-content">
+                    <h4>${item.title}</h4>
+                    <p>${new Date(item.created_at).toLocaleDateString()}</p>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-small btn-edit" onclick="editNews('${item.id}')">Edit</button>
+                    <button class="btn-small btn-delete" onclick="deleteNewsItem('${item.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.deleteNewsItem = async (id) => {
+        if (confirm('Are you sure?')) {
+            await deleteNews(id);
+            loadNews();
+            showMessage('newsSuccess', 'News deleted');
+        }
+    };
+
+    window.editNews = (id) => {
+        alert('Edit feature coming soon');
+    };
+
+    document.getElementById('newsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+
+        const newsData = {
+            title: document.getElementById('newsTitle').value,
+            description: document.getElementById('newsDescription').value,
+            image_url: getImagePath(document.getElementById('newsImage').files?.[0])
+        };
+
+        await createNews(newsData);
+        showMessage('newsSuccess', 'News posted successfully!');
+        form.reset();
+        document.getElementById('newsImagePreview').style.display = 'none';
+        loadNews();
+    });
+
+    document.getElementById('resetNewsForm').addEventListener('click', () => {
+        document.getElementById('newsForm').reset();
+        document.getElementById('newsImagePreview').style.display = 'none';
+    });
+
+    // TEAM
+    async function loadTeam() {
+        const team = await getTeam();
+        const list = document.getElementById('teamList');
+
+        if (team.length === 0) {
+            list.innerHTML = '<div class="empty-state"><p>No team members yet. Add your first member!</p></div>';
+            return;
+        }
+
+        list.innerHTML = team.map(member => `
+            <div class="item">
+                <div class="item-content">
+                    <h4>${member.name}</h4>
+                    <p>${member.role}</p>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-small btn-edit" onclick="editTeam('${member.id}')">Edit</button>
+                    <button class="btn-small btn-delete" onclick="deleteTeamItem('${member.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.deleteTeamItem = async (id) => {
+        if (confirm('Are you sure?')) {
+            await deleteTeamMember(id);
+            loadTeam();
+            showMessage('teamSuccess', 'Member deleted');
+        }
+    };
+
+    window.editTeam = (id) => {
+        alert('Edit feature coming soon');
+    };
+
+    document.getElementById('teamForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+
+        const memberData = {
+            name: document.getElementById('teamName').value,
+            role: document.getElementById('teamRole').value,
+            description: document.getElementById('teamDescription').value,
+            image_url: getImagePath(document.getElementById('teamImage').files?.[0])
+        };
+
+        await createTeamMember(memberData);
+        showMessage('teamSuccess', 'Team member added successfully!');
+        form.reset();
+        document.getElementById('teamImagePreview').style.display = 'none';
+        loadTeam();
+    });
+
+    document.getElementById('resetTeamForm').addEventListener('click', () => {
+        document.getElementById('teamForm').reset();
+        document.getElementById('teamImagePreview').style.display = 'none';
+    });
+
+    // ABOUT
+    async function loadAbout() {
+        const sections = ['Mission', 'Vision', 'Values', 'About Us'];
+        const list = document.getElementById('aboutList');
+
+        const content = await Promise.all(sections.map(s => getAboutSection(s)));
+        const items = sections.map((name, idx) => ({ name, content: content[idx] })).filter(item => item.content);
+
+        if (items.length === 0) {
+            list.innerHTML = '<div class="empty-state"><p>No content yet. Add your first section!</p></div>';
+            return;
+        }
+
+        list.innerHTML = items.map(item => `
+            <div class="item">
+                <div class="item-content">
+                    <h4>${item.name}</h4>
+                    <p>${item.content.substring(0, 100)}...</p>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-small btn-edit" onclick="editAbout('${item.name}')">Edit</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.editAbout = (name) => {
+        document.getElementById('aboutSectionName').value = name;
+        getAboutSection(name).then(content => {
+            document.getElementById('aboutContent').value = content;
+        });
+        document.querySelector('#about .form-card').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    document.getElementById('aboutForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+
+        const sectionName = document.getElementById('aboutSectionName').value;
+        const content = document.getElementById('aboutContent').value;
+
+        await updateAboutSection(sectionName, content);
+        showMessage('aboutSuccess', 'Section saved successfully!');
+        form.reset();
+        loadAbout();
+    });
+
+    document.getElementById('resetAboutForm').addEventListener('click', () => {
+        document.getElementById('aboutForm').reset();
+    });
+
+    // Initial load
+    loadEvents();
+</script>
+
+</body>
+</html>

@@ -17,6 +17,7 @@
             <a href="about.html">About</a>
             <a href="events.html" class="active">Events</a>
             <a href="contact.html">Contact</a>
+            <a href="admin-login.html" style="margin-left: 20px; color: rgba(255,255,255,0.6);">Admin</a>
         </nav>
     </div>
 </header>
@@ -24,21 +25,8 @@
 <div class="container">
     <h2>Our Events</h2>
 
-    <div class="cards">
-        <div class="card">
-            <h3>Pakistan Day Celebration</h3>
-            <p>March 23 - Join us in celebrating Pakistan's national day with cultural performances, traditional food, and community gathering.</p>
-        </div>
-
-        <div class="card">
-            <h3>Eid Gathering</h3>
-            <p>Celebrate Eid with the community. Traditional celebrations, prayers, and festive meals bring everyone together.</p>
-        </div>
-
-        <div class="card">
-            <h3>Community Meetup</h3>
-            <p>Regular monthly meetups to connect with fellow community members, share experiences, and build lasting friendships.</p>
-        </div>
+    <div id="eventsList" class="cards">
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #718096;">Loading...</div>
     </div>
 </div>
 
@@ -51,5 +39,32 @@ function toggleMenu() {
     menu.classList.toggle("active");
 }
 </script>
+
+<script type="module">
+    import { getEvents } from './supabase-client.js';
+
+    async function loadEvents() {
+        const events = await getEvents();
+        const eventsList = document.getElementById('eventsList');
+
+        if (events.length === 0) {
+            eventsList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #718096;">No events scheduled yet. Check back soon!</div>';
+            return;
+        }
+
+        eventsList.innerHTML = events.map(event => `
+            <div class="card">
+                ${event.image_url ? `<img src="${event.image_url}" alt="${event.title}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">` : ''}
+                <h3>${event.title}</h3>
+                <p><strong>Date:</strong> ${new Date(event.date).toLocaleString()}</p>
+                <p><strong>Location:</strong> ${event.location}</p>
+                <p>${event.description}</p>
+            </div>
+        `).join('');
+    }
+
+    loadEvents();
+</script>
+
 </body>
 </html>
