@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - PKSB</title>
+    <title>Admin Setup - PKSB</title>
     <style>
         * {
             margin: 0;
@@ -21,31 +21,47 @@
             padding: 24px;
         }
 
-        .login-container {
+        .setup-container {
             background: white;
             padding: 48px;
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
         }
 
-        .login-container h1 {
+        .setup-container h1 {
             font-size: 28px;
             margin-bottom: 8px;
             color: #1A1A1A;
             text-align: center;
         }
 
-        .login-container p {
+        .setup-container p {
             text-align: center;
             color: #718096;
             margin-bottom: 32px;
             font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #F0F9FF;
+            border-left: 4px solid #0A6E3A;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #1A1A1A;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #01411C;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         label {
@@ -74,51 +90,66 @@
             box-shadow: 0 0 0 3px rgba(1, 65, 28, 0.1);
         }
 
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
         button {
-            width: 100%;
+            flex: 1;
             padding: 12px 16px;
-            background: #01411C;
-            color: white;
             border: none;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s;
+            font-family: inherit;
         }
 
-        button:hover {
+        .btn-create {
+            background: #01411C;
+            color: white;
+        }
+
+        .btn-create:hover {
             background: #0A6E3A;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(1, 65, 28, 0.3);
         }
 
-        button:disabled {
+        .btn-create:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
+        }
+
+        .btn-login {
+            background: #E2E8F0;
+            color: #4A5568;
+        }
+
+        .btn-login:hover {
+            background: #CBD5E0;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            border: 1px solid;
+            display: none;
         }
 
         .error {
             background: #FEE;
             color: #C33;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-            border: 1px solid #FCC;
-            display: none;
+            border-color: #FCC;
         }
 
         .success {
             background: #EFE;
             color: #3C3;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-            border: 1px solid #CFC;
-            display: none;
+            border-color: #CFC;
         }
 
         .loading {
@@ -141,53 +172,88 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            color: #A0AEC0;
+            font-size: 13px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            display: inline-block;
+            width: 45%;
+            height: 1px;
+            background: #E2E8F0;
+            vertical-align: middle;
+            margin: 0 8px;
+        }
     </style>
 </head>
 <body>
 
-<div class="login-container">
-    <h1>Admin Portal</h1>
-    <p>PKSB Braunschweig</p>
+<div class="setup-container">
+    <h1>Admin Setup</h1>
+    <p>Create your admin account to manage website content</p>
 
-    <div class="error" id="errorMsg"></div>
-    <div class="success" id="successMsg"></div>
+    <div class="info-box">
+        <strong>First Time Setup?</strong><br>
+        Enter your email and password to create your admin account. Once created, you can log in to the admin dashboard to manage all website content.
+    </div>
 
-    <form id="loginForm">
+    <div id="errorMsg" class="message error"></div>
+    <div id="successMsg" class="message success"></div>
+
+    <form id="setupForm">
         <div class="form-group">
-            <label for="email">Email</label>
+            <label for="email">Admin Email</label>
             <input type="email" id="email" placeholder="your@email.com" required>
         </div>
 
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="••••••••" required>
+            <input type="password" id="password" placeholder="Create a strong password" required>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="Re-enter your password" required>
         </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
         </div>
 
-        <button type="submit" id="loginBtn">Sign In</button>
+        <div class="button-group">
+            <button type="submit" class="btn-create" id="createBtn">Create Admin Account</button>
+        </div>
     </form>
 
-    <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #E2E8F0;">
-        <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">Don't have an account yet?</p>
-        <a href="admin-setup.html" style="color: #01411C; text-decoration: none; font-weight: 600;">Create Admin Account</a>
+    <div class="divider">or</div>
+
+    <div class="button-group">
+        <button type="button" class="btn-login" id="loginBtn">Go to Login</button>
     </div>
 </div>
 
 <script type="module">
     import { supabase } from './supabase-client.js';
 
-    const form = document.getElementById('loginForm');
+    const form = document.getElementById('setupForm');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const createBtn = document.getElementById('createBtn');
     const loginBtn = document.getElementById('loginBtn');
     const errorMsg = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
     const loading = document.getElementById('loading');
 
-    if (localStorage.getItem('adminToken')) {
+    // Check if user is already logged in
+    const token = localStorage.getItem('adminToken');
+    if (token) {
         window.location.href = 'admin-dashboard.html';
     }
 
@@ -203,41 +269,58 @@
         errorMsg.style.display = 'none';
     }
 
+    loginBtn.addEventListener('click', () => {
+        window.location.href = 'admin-login.html';
+    });
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const email = emailInput.value.trim();
         const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
 
-        if (!email || !password) {
-            showError('Please enter email and password');
+        if (!email || !password || !confirmPassword) {
+            showError('Please fill in all fields');
             return;
         }
 
-        loginBtn.disabled = true;
+        if (password !== confirmPassword) {
+            showError('Passwords do not match');
+            return;
+        }
+
+        if (password.length < 6) {
+            showError('Password must be at least 6 characters');
+            return;
+        }
+
+        createBtn.disabled = true;
         loading.style.display = 'block';
         errorMsg.style.display = 'none';
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signUp({
                 email,
-                password
+                password,
+                options: {
+                    emailRedirectTo: window.location.origin
+                }
             });
 
             if (error) {
-                showError(error.message || 'Login failed');
-                loginBtn.disabled = false;
+                showError(error.message || 'Failed to create account');
+                createBtn.disabled = false;
                 loading.style.display = 'none';
-            } else if (data.session) {
-                showSuccess('Login successful! Redirecting...');
-                localStorage.setItem('adminToken', data.session.access_token);
+            } else if (data.user) {
+                showSuccess('Admin account created! Redirecting to login...');
                 setTimeout(() => {
-                    window.location.href = 'admin-dashboard.html';
-                }, 1000);
+                    window.location.href = 'admin-login.html';
+                }, 2000);
             }
         } catch (err) {
             showError('An error occurred. Please try again.');
-            loginBtn.disabled = false;
+            createBtn.disabled = false;
             loading.style.display = 'none';
         }
     });
