@@ -6,6 +6,7 @@
     --text-dark: #1A1A1A;
     --text-medium: #4A5568;
     --text-light: #718096;
+    --text-extra-light: #dae2ee;
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -81,8 +82,7 @@ body {
 
 /* HERO */
 .hero {
-    background: linear-gradient(135deg, rgba(1, 65, 28, 0.95) 0%, rgba(10, 110, 58, 0.9) 100%),
-                url('https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1920') center/cover;
+    background: url('/images/main.png') center/cover;
     color: white;
     padding: 120px 24px 100px;
     text-align: center;
@@ -191,7 +191,7 @@ section h2 {
 }
 
 section p, section li {
-    color: var(--text-medium);
+    color: var(--text-extra-light);
     font-size: 16px;
     line-height: 1.8;
     margin-bottom: 16px;
@@ -243,6 +243,9 @@ footer p {
 
 .menu-toggle:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+.invisible-text {
+    color: transparent;
 }
 
 /* MOBILE STYLES */

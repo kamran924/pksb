@@ -18,8 +18,43 @@
         }
 
         .dashboard {
-            display: flex;
+            display: none;
             min-height: 100vh;
+        }
+
+        .dashboard.authenticated {
+            display: flex;
+        }
+
+        .auth-check-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #F8FAF9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .auth-check-overlay.hidden {
+            display: none;
+        }
+
+        .auth-check-spinner {
+            border: 4px solid #E2E8F0;
+            border-top: 4px solid #01411C;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .sidebar {
@@ -407,7 +442,11 @@
 </head>
 <body>
 
-<div class="dashboard">
+<div class="auth-check-overlay" id="authCheckOverlay">
+    <div class="auth-check-spinner"></div>
+</div>
+
+<div class="dashboard" id="dashboard">
     <div class="sidebar">
         <h2>Admin</h2>
         <ul class="menu">
@@ -454,11 +493,20 @@
                     </div>
 
                     <div class="form-group">
+                        <label style="display: flex; align-items: center; font-weight: 500;">
+                            <input type="checkbox" id="eventVisible" style="width: 18px; height: 18px; margin-right: 8px; cursor: pointer;">
+                            Visible to Public
+                        </label>
+                    </div>
+
+                    <div class="form-group">
                         <label>Image</label>
                         <div class="file-input-wrapper">
                             <input type="file" id="eventImage" accept="image/*">
                             <label for="eventImage" class="file-input-label">Choose image or drag here</label>
                             <img id="eventImagePreview" class="image-preview" alt="Preview">
+                            <button type="button" class="btn-remove-image" onclick="removeEventImage()" style="display: none;" id="eventRemoveBtn">Remove Image</button>
+                            <button type="button" id="removeEventImage" class="btn-remove-image" style="display: none;">Remove Image</button>
                         </div>
                     </div>
 
@@ -491,11 +539,20 @@
                     </div>
 
                     <div class="form-group">
+                        <label style="display: flex; align-items: center; font-weight: 500;">
+                            <input type="checkbox" id="newsVisible" style="width: 18px; height: 18px; margin-right: 8px; cursor: pointer;">
+                            Visible to Public
+                        </label>
+                    </div>
+
+                    <div class="form-group">
                         <label>Image</label>
                         <div class="file-input-wrapper">
                             <input type="file" id="newsImage" accept="image/*">
                             <label for="newsImage" class="file-input-label">Choose image or drag here</label>
                             <img id="newsImagePreview" class="image-preview" alt="Preview">
+                            <button type="button" class="btn-remove-image" onclick="removeNewsImage()" style="display: none;" id="newsRemoveBtn">Remove Image</button>
+                            <button type="button" id="removeNewsImage" class="btn-remove-image" style="display: none;">Remove Image</button>
                         </div>
                     </div>
 
@@ -533,11 +590,20 @@
                     </div>
 
                     <div class="form-group">
+                        <label style="display: flex; align-items: center; font-weight: 500;">
+                            <input type="checkbox" id="teamVisible" style="width: 18px; height: 18px; margin-right: 8px; cursor: pointer;">
+                            Visible to Public
+                        </label>
+                    </div>
+
+                    <div class="form-group">
                         <label>Image</label>
                         <div class="file-input-wrapper">
                             <input type="file" id="teamImage" accept="image/*">
                             <label for="teamImage" class="file-input-label">Choose image or drag here</label>
                             <img id="teamImagePreview" class="image-preview" alt="Preview">
+                            <button type="button" class="btn-remove-image" onclick="removeTeamImage()" style="display: none;" id="teamRemoveBtn">Remove Image</button>
+                            <button type="button" id="removeTeamImage" class="btn-remove-image" style="display: none;">Remove Image</button>
                         </div>
                     </div>
 
@@ -582,21 +648,44 @@
 </div>
 
 <script type="module">
-    import { supabase, getEvents, getNews, getTeam, getAboutSection, createEvent, updateEvent, deleteEvent, createNews, updateNews, deleteNews, createTeamMember, updateTeamMember, deleteTeamMember, updateAboutSection } from './supabase-client.js';
+    import { getEvents, getNews, getTeam, getAboutSection, createEvent, updateEvent, deleteEvent, createNews, updateNews, deleteNews, createTeamMember, updateTeamMember, deleteTeamMember, updateAboutSection } from './api-client.js';
 
     let currentSession = null;
+    let editingEventId = null;
+    let editingNewsId = null;
+    let editingTeamId = null;
+    let uploadedEventImage = null;
+    let uploadedNewsImage = null;
+    let uploadedTeamImage = null;
 
-    // Check authentication
-    async function checkAuth() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            window.location.href = 'admin-login.html';
-        } else {
-            currentSession = session;
+    // Check if user is authenticated via simple session token
+    function checkAuth() {
+        console.log('Checking authentication...');
+        
+        // Check for session token (sessionStorage auto-clears on browser close)
+        const token = sessionStorage.getItem('adminToken');
+        
+        console.log('Session token:', token ? 'Found' : 'Not found');
+        
+        if (!token) {
+            console.log('No session token, redirecting to login...');
+            window.location.href = 'admin-login-simple.html';
+            return;
         }
+
+        console.log('Auth check passed! Showing dashboard...');
+        currentSession = { authenticated: true };
+        
+        // Auth passed - show dashboard and hide overlay
+        document.getElementById('dashboard').classList.add('authenticated');
+        document.getElementById('authCheckOverlay').classList.add('hidden');
+        
+        // Load initial content
+        loadEvents();
     }
 
-    // Initialize
+    // Initialize - check auth immediately
+    console.log('Page loaded, checking authentication...');
     checkAuth();
 
     // Navigation
@@ -618,9 +707,9 @@
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        localStorage.removeItem('adminToken');
-        window.location.href = 'admin-login.html';
+        // Clear session token
+        sessionStorage.removeItem('adminToken');
+        window.location.href = 'admin-login-simple.html';
     });
 
     // File input handlers
@@ -628,6 +717,7 @@
         const input = document.getElementById(inputId);
         const preview = document.getElementById(previewId);
         const label = input.nextElementSibling;
+        const removeBtn = document.getElementById(previewId.replace('Preview', 'RemoveBtn'));
 
         input.addEventListener('change', (e) => {
             const file = e.target.files?.[0];
@@ -636,6 +726,7 @@
                 reader.onload = (event) => {
                     preview.src = event.target?.result;
                     preview.style.display = 'block';
+                    if (removeBtn) removeBtn.style.display = 'block';
                 };
                 reader.readAsDataURL(file);
             }
@@ -669,6 +760,28 @@
     setupFileInput('newsImage', 'newsImagePreview');
     setupFileInput('teamImage', 'teamImagePreview');
 
+    // Remove image functions
+    window.removeEventImage = () => {
+        uploadedEventImage = null;
+        document.getElementById('eventImagePreview').style.display = 'none';
+        document.getElementById('eventImage').value = '';
+        document.getElementById('eventRemoveBtn').style.display = 'none';
+    };
+
+    window.removeNewsImage = () => {
+        uploadedNewsImage = null;
+        document.getElementById('newsImagePreview').style.display = 'none';
+        document.getElementById('newsImage').value = '';
+        document.getElementById('newsRemoveBtn').style.display = 'none';
+    };
+
+    window.removeTeamImage = () => {
+        uploadedTeamImage = null;
+        document.getElementById('teamImagePreview').style.display = 'none';
+        document.getElementById('teamImage').value = '';
+        document.getElementById('teamRemoveBtn').style.display = 'none';
+    };
+
     // Utility functions
     function showMessage(elementId, message, isError = false) {
         const element = document.getElementById(elementId);
@@ -683,6 +796,39 @@
     function getImagePath(file) {
         if (!file) return null;
         return `images/${Date.now()}_${file.name}`;
+    }
+
+    async function uploadImage(file) {
+        if (!file) return null;
+
+        try {
+            const reader = new FileReader();
+            return new Promise((resolve) => {
+                reader.onload = async (event) => {
+                    const base64 = event.target.result;
+                    const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filename: file.name,
+                            data: base64
+                        })
+                    });
+
+                    if (res.ok) {
+                        const result = await res.json();
+                        resolve(result.path);
+                    } else {
+                        console.error('Upload failed');
+                        resolve(null);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        } catch (err) {
+            console.error('Error uploading image:', err);
+            return null;
+        }
     }
 
     // EVENTS
@@ -700,6 +846,9 @@
                 <div class="item-content">
                     <h4>${event.title}</h4>
                     <p>${new Date(event.date).toLocaleString()} • ${event.location}</p>
+                    <p style="font-size: 12px; color: ${event.isVisibleToPublic ? '#3C3' : '#C33'}; margin-top: 8px;">
+                        ${event.isVisibleToPublic ? '✓ Visible to Public' : '✗ Hidden from Public'}
+                    </p>
                 </div>
                 <div class="item-actions">
                     <button class="btn-small btn-edit" onclick="editEvent('${event.id}')">Edit</button>
@@ -717,32 +866,69 @@
         }
     };
 
-    window.editEvent = (id) => {
-        alert('Edit feature coming soon');
+    window.editEvent = async (id) => {
+        const events = await getEvents();
+        const event = events.find(e => e.id === id);
+        if (!event) return;
+
+        editingEventId = id;
+        uploadedEventImage = event.image_url;
+        document.getElementById('eventTitle').value = event.title;
+        document.getElementById('eventDate').value = new Date(event.date).toISOString().slice(0, 16);
+        document.getElementById('eventLocation').value = event.location;
+        document.getElementById('eventDescription').value = event.description;
+        document.getElementById('eventVisible').checked = event.isVisibleToPublic || false;
+        
+        // Display existing image preview
+        if (event.image_url) {
+            const preview = document.getElementById('eventImagePreview');
+            preview.src = event.image_url;
+            preview.style.display = 'block';
+            document.getElementById('eventRemoveBtn').style.display = 'block';
+        }
+        
+        document.querySelector('#events .form-card h3').textContent = 'Edit Event';
+        document.querySelector('#events button[type="submit"]').textContent = 'Update Event';
+        
+        document.querySelector('#events .form-card').scrollIntoView({ behavior: 'smooth' });
     };
 
     document.getElementById('eventForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const form = e.target;
 
+        // Upload image if provided
+        const imageFile = document.getElementById('eventImage').files?.[0];
+        const imagePath = imageFile ? await uploadImage(imageFile) : uploadedEventImage;
+
         const eventData = {
+            id: editingEventId || Date.now().toString(),
             title: document.getElementById('eventTitle').value,
             date: new Date(document.getElementById('eventDate').value).toISOString(),
             location: document.getElementById('eventLocation').value,
             description: document.getElementById('eventDescription').value,
-            image_url: getImagePath(document.getElementById('eventImage').files?.[0])
+            image_url: imagePath,
+            isVisibleToPublic: document.getElementById('eventVisible').checked
         };
 
         await createEvent(eventData);
-        showMessage('eventSuccess', 'Event created successfully!');
+        showMessage('eventSuccess', editingEventId ? 'Event updated!' : 'Event created successfully!');
         form.reset();
         document.getElementById('eventImagePreview').style.display = 'none';
+        uploadedEventImage = null;
+        editingEventId = null;
+        document.querySelector('#events .form-card h3').textContent = 'Add New Event';
+        document.querySelector('#events button[type="submit"]').textContent = 'Create Event';
         loadEvents();
     });
 
     document.getElementById('resetEventForm').addEventListener('click', () => {
         document.getElementById('eventForm').reset();
         document.getElementById('eventImagePreview').style.display = 'none';
+        document.getElementById('eventVisible').checked = false;
+        editingEventId = null;
+        document.querySelector('#events .form-card h3').textContent = 'Add New Event';
+        document.querySelector('#events button[type="submit"]').textContent = 'Create Event';
     });
 
     // NEWS
@@ -760,6 +946,9 @@
                 <div class="item-content">
                     <h4>${item.title}</h4>
                     <p>${new Date(item.created_at).toLocaleDateString()}</p>
+                    <p style="font-size: 12px; color: ${item.isVisibleToPublic ? '#3C3' : '#C33'}; margin-top: 8px;">
+                        ${item.isVisibleToPublic ? '✓ Visible to Public' : '✗ Hidden from Public'}
+                    </p>
                 </div>
                 <div class="item-actions">
                     <button class="btn-small btn-edit" onclick="editNews('${item.id}')">Edit</button>
@@ -777,30 +966,67 @@
         }
     };
 
-    window.editNews = (id) => {
-        alert('Edit feature coming soon');
+    window.editNews = async (id) => {
+        const newsList = await getNews();
+        const newsItem = newsList.find(n => n.id === id);
+        if (!newsItem) return;
+
+        editingNewsId = id;
+        uploadedNewsImage = newsItem.image_url;
+        document.getElementById('newsTitle').value = newsItem.title;
+        document.getElementById('newsDescription').value = newsItem.description;
+        document.getElementById('newsVisible').checked = newsItem.isVisibleToPublic || false;
+        
+        // Display existing image preview
+        if (newsItem.image_url) {
+            const preview = document.getElementById('newsImagePreview');
+            preview.src = newsItem.image_url;
+            preview.style.display = 'block';
+            document.getElementById('newsRemoveBtn').style.display = 'block';
+        }
+        
+        document.querySelector('#news .form-card h3').textContent = 'Edit News Update';
+        document.querySelector('#news button[type="submit"]').textContent = 'Update News';
+        
+        document.querySelector('#news .form-card').scrollIntoView({ behavior: 'smooth' });
     };
 
     document.getElementById('newsForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const form = e.target;
 
+        // Upload image if provided
+        const imageFile = document.getElementById('newsImage').files?.[0];
+        const imagePath = imageFile ? await uploadImage(imageFile) : uploadedNewsImage;
+
         const newsData = {
+            id: editingNewsId || Date.now().toString(),
             title: document.getElementById('newsTitle').value,
             description: document.getElementById('newsDescription').value,
-            image_url: getImagePath(document.getElementById('newsImage').files?.[0])
+            image_url: imagePath,
+            isVisibleToPublic: document.getElementById('newsVisible').checked,
+            created_at: new Date().toISOString()
         };
 
         await createNews(newsData);
-        showMessage('newsSuccess', 'News posted successfully!');
+        showMessage('newsSuccess', editingNewsId ? 'News updated!' : 'News posted successfully!');
         form.reset();
         document.getElementById('newsImagePreview').style.display = 'none';
+        uploadedNewsImage = null;
+        editingNewsId = null;
+        document.querySelector('#news .form-card h3').textContent = 'Add News Update';
+        document.querySelector('#news button[type="submit"]').textContent = 'Post News';
         loadNews();
     });
 
     document.getElementById('resetNewsForm').addEventListener('click', () => {
         document.getElementById('newsForm').reset();
         document.getElementById('newsImagePreview').style.display = 'none';
+        document.getElementById('newsVisible').checked = false;
+        uploadedNewsImage = null;
+        editingNewsId = null;
+        document.querySelector('#news .form-card h3').textContent = 'Add News Update';
+        document.querySelector('#news button[type="submit"]').textContent = 'Post News';
     });
 
     // TEAM
@@ -818,6 +1044,9 @@
                 <div class="item-content">
                     <h4>${member.name}</h4>
                     <p>${member.role}</p>
+                    <p style="font-size: 12px; color: ${member.isVisibleToPublic ? '#3C3' : '#C33'}; margin-top: 8px;">
+                        ${member.isVisibleToPublic ? '✓ Visible to Public' : '✗ Hidden from Public'}
+                    </p>
                 </div>
                 <div class="item-actions">
                     <button class="btn-small btn-edit" onclick="editTeam('${member.id}')">Edit</button>
@@ -835,31 +1064,69 @@
         }
     };
 
-    window.editTeam = (id) => {
-        alert('Edit feature coming soon');
+    window.editTeam = async (id) => {
+        const teamList = await getTeam();
+        const member = teamList.find(m => m.id === id);
+        if (!member) return;
+
+        editingTeamId = id;
+        uploadedTeamImage = member.image_url;
+        document.getElementById('teamName').value = member.name;
+        document.getElementById('teamRole').value = member.role;
+        document.getElementById('teamDescription').value = member.description || '';
+        document.getElementById('teamVisible').checked = member.isVisibleToPublic || false;
+        
+        // Display existing image preview
+        if (member.image_url) {
+            const preview = document.getElementById('teamImagePreview');
+            preview.src = member.image_url;
+            preview.style.display = 'block';
+            document.getElementById('teamRemoveBtn').style.display = 'block';
+        }
+        
+        document.querySelector('#team .form-card h3').textContent = 'Edit Team Member';
+        document.querySelector('#team button[type="submit"]').textContent = 'Update Member';
+        
+        document.querySelector('#team .form-card').scrollIntoView({ behavior: 'smooth' });
     };
 
     document.getElementById('teamForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const form = e.target;
 
+        // Upload image if provided
+        const imageFile = document.getElementById('teamImage').files?.[0];
+        const imagePath = imageFile ? await uploadImage(imageFile) : uploadedTeamImage;
+
         const memberData = {
+            id: editingTeamId || Date.now().toString(),
             name: document.getElementById('teamName').value,
             role: document.getElementById('teamRole').value,
             description: document.getElementById('teamDescription').value,
-            image_url: getImagePath(document.getElementById('teamImage').files?.[0])
+            image_url: imagePath,
+            isVisibleToPublic: document.getElementById('teamVisible').checked
         };
 
         await createTeamMember(memberData);
-        showMessage('teamSuccess', 'Team member added successfully!');
+        showMessage('teamSuccess', editingTeamId ? 'Member updated!' : 'Team member added successfully!');
         form.reset();
         document.getElementById('teamImagePreview').style.display = 'none';
+        uploadedTeamImage = null;
+        editingTeamId = null;
+        document.querySelector('#team .form-card h3').textContent = 'Add Team Member';
+        document.querySelector('#team button[type="submit"]').textContent = 'Add Member';
         loadTeam();
     });
 
     document.getElementById('resetTeamForm').addEventListener('click', () => {
         document.getElementById('teamForm').reset();
         document.getElementById('teamImagePreview').style.display = 'none';
+        document.getElementById('teamRemoveBtn').style.display = 'none';
+        document.getElementById('teamVisible').checked = false;
+        uploadedTeamImage = null;
+        editingTeamId = null;
+        document.querySelector('#team .form-card h3').textContent = 'Add Team Member';
+        document.querySelector('#team button[type="submit"]').textContent = 'Add Member';
     });
 
     // ABOUT

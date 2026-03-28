@@ -17,7 +17,6 @@
             <a href="about.html" class="active">About</a>
             <a href="events.html">Events</a>
             <a href="contact.html">Contact</a>
-            <a href="admin-login.html" style="margin-left: 20px; color: rgba(255,255,255,0.6);">Admin</a>
         </nav>
     </div>
 </header>
@@ -46,10 +45,10 @@ function toggleMenu() {
 </script>
 
 <script type="module">
-    import { getAboutSection, getTeam } from './supabase-client.js';
+    import { getAboutSection, getTeam } from './api-client.js';
 
     async function loadAbout() {
-        const sections = ['About Us', 'Mission', 'Vision', 'Goals'];
+        const sections = ['About Us', 'Mission', 'Vision', 'Values'];
         const aboutContent = document.getElementById('aboutContent');
 
         const content = await Promise.all(sections.map(s => getAboutSection(s)));
@@ -78,7 +77,7 @@ function toggleMenu() {
     }
 
     async function loadTeam() {
-        const team = await getTeam();
+        const team = (await getTeam()).filter(member => member.isVisibleToPublic !== false);
         const teamList = document.getElementById('teamList');
 
         if (team.length === 0) {

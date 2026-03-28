@@ -17,15 +17,14 @@
             <a href="about.html">About</a>
             <a href="events.html">Events</a>
             <a href="contact.html">Contact</a>
-            <a href="admin-login.html" style="margin-left: 20px; color: rgba(255,255,255,0.6);">Admin</a>
         </nav>
     </div>
 </header>
 
 <section class="hero">
     <div class="hero-content">
-        <h2>Welcome to PKSB</h2>
-        <p>Pakistani Community in Braunschweig - Celebrating culture, fostering connections, building community</p>
+        <h2 class="invisible-text">Welcome to PKSB</h2>
+        <p class="invisible-text">Pakistani Community in Braunschweig - Celebrating culture, fostering connections, building community</p>
     </div>
 </section>
 
@@ -55,18 +54,21 @@ function toggleMenu() {
 </script>
 
 <script type="module">
-    import { getNews, getEvents } from './supabase-client.js';
+    import { getNews, getEvents } from './api-client.js';
 
     async function loadNews() {
         const news = await getNews();
         const newsList = document.getElementById('newsList');
 
-        if (news.length === 0) {
+        // Filter only visible items
+        const visibleNews = news.filter(item => item.isVisibleToPublic !== false);
+
+        if (visibleNews.length === 0) {
             newsList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #718096;">No news yet. Check back soon!</div>';
             return;
         }
 
-        newsList.innerHTML = news.map(item => `
+        newsList.innerHTML = visibleNews.map(item => `
             <div class="card">
                 ${item.image_url ? `<img src="${item.image_url}" alt="${item.title}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">` : ''}
                 <h3>${item.title}</h3>
@@ -80,12 +82,15 @@ function toggleMenu() {
         const events = await getEvents();
         const eventsList = document.getElementById('eventsList');
 
-        if (events.length === 0) {
+        // Filter only visible items
+        const visibleEvents = events.filter(event => event.isVisibleToPublic !== false);
+
+        if (visibleEvents.length === 0) {
             eventsList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #718096;">No upcoming events. Stay tuned!</div>';
             return;
         }
 
-        eventsList.innerHTML = events.map(event => `
+        eventsList.innerHTML = visibleEvents.map(event => `
             <div class="card">
                 ${event.image_url ? `<img src="${event.image_url}" alt="${event.title}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">` : ''}
                 <h3>${event.title}</h3>

@@ -56,7 +56,7 @@
             font-size: 14px;
         }
 
-        input[type="email"],
+        input[type="text"],
         input[type="password"] {
             width: 100%;
             padding: 12px 16px;
@@ -67,7 +67,7 @@
             transition: all 0.3s;
         }
 
-        input[type="email"]:focus,
+        input[type="text"]:focus,
         input[type="password"]:focus {
             outline: none;
             border-color: #01411C;
@@ -141,9 +141,22 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .info-box {
+            background: #F0F9FF;
+            border-left: 4px solid #0A6E3A;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 12px;
+            color: #1A1A1A;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
+
+<script src="config.js"></script>
 
 <div class="login-container">
     <h1>Admin Portal</h1>
@@ -154,13 +167,13 @@
 
     <form id="loginForm">
         <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="your@email.com" required>
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter username" required autofocus>
         </div>
 
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="••••••••" required>
+            <input type="password" id="password" placeholder="Enter password" required>
         </div>
 
         <div class="loading" id="loading">
@@ -170,24 +183,22 @@
         <button type="submit" id="loginBtn">Sign In</button>
     </form>
 
-    <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #E2E8F0;">
-        <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">Don't have an account yet?</p>
-        <a href="admin-setup.html" style="color: #01411C; text-decoration: none; font-weight: 600;">Create Admin Account</a>
+    <div class="info-box">
+        ℹ️ <strong>Session Note:</strong> Your login session will automatically end when you close this browser window.
     </div>
 </div>
 
-<script type="module">
-    import { supabase } from './supabase-client.js';
-
+<script>
     const form = document.getElementById('loginForm');
-    const emailInput = document.getElementById('email');
+    const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const loginBtn = document.getElementById('loginBtn');
     const errorMsg = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
     const loading = document.getElementById('loading');
 
-    if (localStorage.getItem('adminToken')) {
+    // Check if already logged in
+    if (sessionStorage.getItem('adminToken')) {
         window.location.href = 'admin-dashboard.html';
     }
 
@@ -206,11 +217,11 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const email = emailInput.value.trim();
+        const username = usernameInput.value.trim();
         const password = passwordInput.value;
 
-        if (!email || !password) {
-            showError('Please enter email and password');
+        if (!username || !password) {
+            showError('Please enter username and password');
             return;
         }
 
@@ -219,23 +230,42 @@
         errorMsg.style.display = 'none';
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
+            // Get admin credentials from window config
+            // These are set as environment variables at build time
+            const adminUsername = window.ADMIN_USERNAME;
+            const adminPassword = window.ADMIN_PASSWORD;
 
-            if (error) {
-                showError(error.message || 'Login failed');
+            console.log('Login attempt:');
+            console.log('  Entered username:', username);
+            console.log('  Expected username:', adminUsername);
+            console.log('  Credentials match:', username === adminUsername && password === adminPassword);
+
+            if (!adminUsername || !adminPassword) {
+                console.error('Config error: Missing credentials in window');
+                showError('Server configuration error. Please contact administrator.');
                 loginBtn.disabled = false;
                 loading.style.display = 'none';
-            } else if (data.session) {
+                return;
+            }
+
+            // Simple credential check
+            if (username === adminUsername && password === adminPassword) {
+                console.log('✓ Credentials match! Setting session...');
                 showSuccess('Login successful! Redirecting...');
-                localStorage.setItem('adminToken', data.session.access_token);
+                // Use sessionStorage - auto-clears when browser closes
+                sessionStorage.setItem('adminToken', 'authenticated');
                 setTimeout(() => {
+                    console.log('Redirecting to dashboard...');
                     window.location.href = 'admin-dashboard.html';
                 }, 1000);
+            } else {
+                console.log('✗ Credentials do not match');
+                showError('Invalid username or password');
+                loginBtn.disabled = false;
+                loading.style.display = 'none';
             }
         } catch (err) {
+            console.error('Login error:', err);
             showError('An error occurred. Please try again.');
             loginBtn.disabled = false;
             loading.style.display = 'none';
