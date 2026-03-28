@@ -1,38 +1,46 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPO  = process.env.GITHUB_REPO;
+const BRANCH       = process.env.GITHUB_BRANCH || 'main';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dbPath = path.join(__dirname, '../db');
+async function getFile(type) {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/db/${type}.json?ref=${BRANCH}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: 'application/vnd.github.v3+json' }
+  });
 
-// Ensure db directory exists
-if (!fs.existsSync(dbPath)) {
-  fs.mkdirSync(dbPath, { recursive: true });
+  if (res.status === 404) return { data: type === 'about' ? {} : [], sha: null };
+  if (!res.ok) throw new Error(`GitHub read error: ${res.status}`);
+
+  const file = await res.json();
+  return {
+    data: JSON.parse(Buffer.from(file.content, 'base64').toString('utf8')),
+    sha: file.sha
+  };
 }
 
-function getDataPath(type) {
-  return path.join(dbPath, `${type}.json`);
+async function writeFile(type, data, sha) {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/db/${type}.json`;
+  const body = {
+    message: `Update ${type}.json via admin dashboard`,
+    content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
+    branch: BRANCH,
+    ...(sha && { sha })
+  };
+
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) throw new Error(`GitHub write error: ${res.status} — ${await res.text()}`);
 }
 
-function readData(type) {
-  try {
-    const data = fs.readFileSync(getDataPath(type), 'utf8');
-    return JSON.parse(data);
-  } catch {
-    return type === 'about' ? {} : [];
-  }
-}
-
-function writeData(type, data) {
-  fs.writeFileSync(getDataPath(type), JSON.stringify(data, null, 2));
-}
-
-function generateId() {
-  return Date.now().toString();
-}
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -40,50 +48,51 @@ export default function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { type, id } = req.query;
-
   if (!type) return res.status(400).json({ error: 'Missing type parameter' });
 
-  // GET: fetch all items
-  if (req.method === 'GET') {
-    const data = readData(type);
-    return res.status(200).json(data);
+  if (!GITHUB_TOKEN || !GITHUB_REPO) {
+    return res.status(500).json({ error: 'Missing GITHUB_TOKEN or GITHUB_REPO environment variables' });
   }
 
-  // POST: add or update
-  if (req.method === 'POST') {
-    const data = readData(type);
-    const item = req.body;
-    
-    if (!item.id) item.id = generateId();
+  try {
+    if (req.method === 'GET') {
+      const { data } = await getFile(type);
+      return res.status(200).json(data);
+    }
 
-    if (Array.isArray(data)) {
-      const index = data.findIndex(i => i.id === item.id);
-      if (index > -1) {
-        data[index] = item;
-      } else {
-        data.push(item);
+    if (req.method === 'POST') {
+      const { data, sha } = await getFile(type);
+      const item = req.body;
+
+      if (type === 'about') {
+        const { id: _id, ...sections } = item;
+        const newData = { ...data, ...sections };
+        await writeFile(type, newData, sha);
+        return res.status(200).json(newData);
       }
-    } else {
-      data[item.id || item.name] = item;
+
+      if (!item.id) item.id = Date.now().toString();
+      const arr = Array.isArray(data) ? [...data] : [];
+      const index = arr.findIndex(i => i.id === item.id);
+      if (index > -1) arr[index] = item;
+      else arr.push(item);
+
+      await writeFile(type, arr, sha);
+      return res.status(200).json(item);
     }
 
-    writeData(type, data);
-    return res.status(200).json(item);
-  }
-
-  // DELETE: remove item
-  if (req.method === 'DELETE') {
-    if (!id) return res.status(400).json({ error: 'Missing id parameter' });
-    
-    const data = readData(type);
-    
-    if (Array.isArray(data)) {
-      const filtered = data.filter(i => i.id !== id);
-      writeData(type, filtered);
+    if (req.method === 'DELETE') {
+      if (!id) return res.status(400).json({ error: 'Missing id parameter' });
+      const { data, sha } = await getFile(type);
+      if (Array.isArray(data)) {
+        await writeFile(type, data.filter(i => i.id !== id), sha);
+      }
+      return res.status(200).json({ success: true });
     }
 
-    return res.status(200).json({ success: true });
+    return res.status(405).json({ error: 'Method not allowed' });
+  } catch (err) {
+    console.error('Content API error:', err);
+    return res.status(500).json({ error: err.message });
   }
-
-  res.status(405).json({ error: 'Method not allowed' });
 }
