@@ -24,22 +24,7 @@
 <div class="container">
     <h2>Get in Touch</h2>
 
-    <div class="cards">
-        <div class="card">
-            <h3>Email Us</h3>
-            <p><a href="mailto:info@pksb.de" style="color: #0A6E3A; text-decoration: none;">info@pksb.de</a></p>
-        </div>
-
-        <div class="card">
-            <h3>Visit Us</h3>
-            <p>Braunschweig, Germany</p>
-        </div>
-
-        <div class="card">
-            <h3>Join Our Community</h3>
-            <p>We welcome everyone interested in Pakistani culture and community building. Reach out to learn more about our activities and events.</p>
-        </div>
-    </div>
+    <div id="contactContent" class="cards"></div>
 </div>
 
 <footer>
@@ -50,6 +35,15 @@ function toggleMenu() {
     const menu = document.getElementById("nav-menu");
     menu.classList.toggle("active");
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const contactContent = document.getElementById('contactContent');
+    contactContent.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #718096;">
+            <p>Contact information will be displayed here.</p>
+        </div>
+    `;
+});
 </script>
 
 </body>
