@@ -57,19 +57,12 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const { data } = await getFile(type);
-      return res.status(200).json(data);
+      return res.status(200).json(Array.isArray(data) ? data : []);
     }
 
     if (req.method === 'POST') {
       const { data, sha } = await getFile(type);
       const item = req.body;
-
-      if (type === 'about') {
-        const { id: _id, ...sections } = item;
-        const newData = { ...data, ...sections };
-        await writeFile(type, newData, sha);
-        return res.status(200).json(newData);
-      }
 
       if (!item.id) item.id = Date.now().toString();
       const arr = Array.isArray(data) ? [...data] : [];

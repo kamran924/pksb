@@ -88,6 +88,45 @@ export async function updateTeamMember() {
 }
 
 // ABOUT
+export async function getAboutSections() {
+  try {
+    const data = await apiCall('about');
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Error fetching about:', err);
+    return [];
+  }
+}
+
+export async function createAboutSection(name, content) {
+  try {
+    const aboutData = { name, content };
+    return apiCall('about', 'POST', aboutData);
+  } catch (err) {
+    console.error('Error creating about section:', err);
+    throw err;
+  }
+}
+
+export async function updateAboutSection(id, name, content) {
+  try {
+    const aboutData = { id, name, content };
+    return apiCall('about', 'POST', aboutData);
+  } catch (err) {
+    console.error('Error updating about:', err);
+    throw err;
+  }
+}
+
+export async function deleteAboutSection(id) {
+  try {
+    return apiCall('about', 'DELETE', null, id);
+  } catch (err) {
+    console.error('Error deleting about:', err);
+    throw err;
+  }
+}
+
 export async function getAboutSection(sectionName) {
   try {
     const data = await apiCall('about');
@@ -95,15 +134,5 @@ export async function getAboutSection(sectionName) {
   } catch (err) {
     console.error('Error fetching about:', err);
     return '';
-  }
-}
-
-export async function updateAboutSection(sectionName, content) {
-  try {
-    const data = await apiCall('about');
-    const aboutData = { id: sectionName, ...data, [sectionName]: content };
-    return apiCall('about', 'POST', aboutData);
-  } catch (err) {
-    console.error('Error updating about:', err);
   }
 }

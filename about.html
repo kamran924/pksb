@@ -45,16 +45,13 @@ function toggleMenu() {
 </script>
 
 <script type="module">
-    import { getAboutSection, getTeam } from './api-client.js';
+    import { getAboutSections, getTeam } from './api-client.js';
 
     async function loadAbout() {
-        const sections = ['About Us', 'Mission', 'Vision', 'Values'];
         const aboutContent = document.getElementById('aboutContent');
+        const sections = await getAboutSections();
 
-        const content = await Promise.all(sections.map(s => getAboutSection(s)));
-        const items = sections.map((name, idx) => ({ name, content: content[idx] })).filter(item => item.content);
-
-        if (items.length === 0) {
+        if (sections.length === 0) {
             aboutContent.innerHTML = `
                 <div class="card">
                     <h3>Who We Are</h3>
@@ -68,7 +65,7 @@ function toggleMenu() {
             return;
         }
 
-        aboutContent.innerHTML = items.map(item => `
+        aboutContent.innerHTML = sections.map(item => `
             <div class="card">
                 <h3>${item.name}</h3>
                 <p>${item.content}</p>

@@ -648,7 +648,7 @@
 </div>
 
 <script type="module">
-    import { getEvents, getNews, getTeam, getAboutSection, createEvent, updateEvent, deleteEvent, createNews, updateNews, deleteNews, createTeamMember, updateTeamMember, deleteTeamMember, updateAboutSection } from './api-client.js';
+    import { getEvents, getNews, getTeam, getAboutSections, createAboutSection, updateAboutSection, deleteAboutSection, createEvent, updateEvent, deleteEvent, createNews, updateNews, deleteNews, createTeamMember, updateTeamMember, deleteTeamMember, updateContact } from './api-client.js';
 
     let currentSession = null;
     let editingEventId = null;
@@ -1130,54 +1130,88 @@
     });
 
     // ABOUT
+    let editingAboutId = null;
+
     async function loadAbout() {
-        const sections = ['Mission', 'Vision', 'Values', 'About Us'];
+        const sections = await getAboutSections();
         const list = document.getElementById('aboutList');
 
-        const content = await Promise.all(sections.map(s => getAboutSection(s)));
-        const items = sections.map((name, idx) => ({ name, content: content[idx] })).filter(item => item.content);
-
-        if (items.length === 0) {
+        if (sections.length === 0) {
             list.innerHTML = '<div class="empty-state"><p>No content yet. Add your first section!</p></div>';
             return;
         }
 
-        list.innerHTML = items.map(item => `
+        list.innerHTML = sections.map(item => `
             <div class="item">
                 <div class="item-content">
                     <h4>${item.name}</h4>
                     <p>${item.content.substring(0, 100)}...</p>
                 </div>
                 <div class="item-actions">
-                    <button class="btn-small btn-edit" onclick="editAbout('${item.name}')">Edit</button>
+                    <button class="btn-small btn-edit" onclick="editAbout('${item.id}')">Edit</button>
+                    <button class="btn-small btn-delete" onclick="deleteAbout('${item.id}')">Delete</button>
                 </div>
             </div>
         `).join('');
     }
 
-    window.editAbout = (name) => {
-        document.getElementById('aboutSectionName').value = name;
-        getAboutSection(name).then(content => {
-            document.getElementById('aboutContent').value = content;
+    window.editAbout = (id) => {
+        const sections = getAboutSections().then(sections => {
+            const item = sections.find(s => s.id === id);
+            if (item) {
+                editingAboutId = id;
+                document.getElementById('aboutSectionName').value = item.name;
+                document.getElementById('aboutContent').value = item.content;
+                document.querySelector('#about .form-card h3').textContent = 'Edit Section';
+                document.querySelector('#aboutForm button[type="submit"]').textContent = 'Update Section';
+                document.querySelector('#about .form-card').scrollIntoView({ behavior: 'smooth' });
+            }
         });
-        document.querySelector('#about .form-card').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deleteAbout = async (id) => {
+        if (confirm('Are you sure you want to delete this section?')) {
+            try {
+                await deleteAboutSection(id);
+                showMessage('aboutSuccess', 'Section deleted successfully!');
+                loadAbout();
+            } catch (err) {
+                showMessage('aboutError', 'Error deleting section: ' + err.message);
+            }
+        }
     };
 
     document.getElementById('aboutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const form = e.target;
 
-        const sectionName = document.getElementById('aboutSectionName').value;
-        const content = document.getElementById('aboutContent').value;
+        try {
+            const name = document.getElementById('aboutSectionName').value;
+            const content = document.getElementById('aboutContent').value;
 
-        await updateAboutSection(sectionName, content);
-        showMessage('aboutSuccess', 'Section saved successfully!');
-        form.reset();
-        loadAbout();
+            if (editingAboutId) {
+                await updateAboutSection(editingAboutId, name, content);
+                showMessage('aboutSuccess', 'Section updated successfully!');
+                editingAboutId = null;
+                document.querySelector('#about .form-card h3').textContent = 'About Page Content';
+                document.querySelector('#aboutForm button[type="submit"]').textContent = 'Save Section';
+            } else {
+                await createAboutSection(name, content);
+                showMessage('aboutSuccess', 'Section created successfully!');
+            }
+
+            form.reset();
+            loadAbout();
+        } catch (err) {
+            showMessage('aboutError', 'Error saving section: ' + err.message);
+        }
     });
 
     document.getElementById('resetAboutForm').addEventListener('click', () => {
         document.getElementById('aboutForm').reset();
+        editingAboutId = null;
+        document.querySelector('#about .form-card h3').textContent = 'About Page Content';
+        document.querySelector('#aboutForm button[type="submit"]').textContent = 'Save Section';
     });
 
     // Initial load
