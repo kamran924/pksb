@@ -1,37 +1,41 @@
-[
-  {
+{
+  "0": {
     "email": "contact@admin.de",
     "phone": "123",
     "address": "some address",
     "notes": "dfsdf sdf ",
     "id": "1775246608920"
   },
-  {
+  "1": {
     "email": "contact@admin.de",
     "phone": "123",
     "address": "ertr",
     "notes": "ertrt",
     "id": "1775246660477"
   },
-  {
+  "2": {
     "email": "contact@admin.de",
     "phone": "123",
     "address": "ertr",
     "notes": "ertrt",
     "id": "1775246661509"
   },
-  {
+  "3": {
     "email": "",
     "phone": "",
     "address": "",
     "notes": "",
     "id": "1775246663128"
   },
-  {
+  "4": {
     "email": "contact@admin.de",
     "phone": "ewer",
     "address": "wertert",
     "notes": "ertert",
     "id": "1775246688052"
-  }
-]
+  },
+  "email": "contact@admin.de",
+  "phone": "123",
+  "address": "retrt",
+  "notes": "ertert"
+}
